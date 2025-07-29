@@ -11,7 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #f9fafb;
+            --bg-color: #f8fafc;
             --text-color: #111827;
             --primary-color: #2563EB;
             --glass-bg: rgba(255, 255, 255, 0.7);
@@ -92,7 +92,7 @@
         }
 
         .model-answer.visible {
-            max-height: 1200px;
+            max-height: 1500px;
             opacity: 1;
             margin-top: 1.5rem;
         }
@@ -203,53 +203,56 @@
         .card-title svg {
             margin-right: 0.75rem;
         }
-        .formula {
-            background-color: #eef2ff;
-            color: #312e81;
-            padding: 1rem;
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin: 0 0.2rem;
+        }
+        .tag-pc { background-color: #dbeafe; color: #1e40af; }
+        .tag-vc { background-color: #dcfce7; color: #166534; }
+        .tag-cmv { background-color: #fee2e2; color: #991b1b; }
+        .tag-imv { background-color: #ffedd5; color: #9a3412; }
+        .tag-csv { background-color: #e0e7ff; color: #3730a3; }
+        .tag-s { background-color: #f3e8ff; color: #6b21a8; }
+        .tag-a { background-color: #ede9fe; color: #5b21b6; }
+        .tag-r { background-color: #cffafe; color: #0e7490; }
+
+        .collapsible {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
             border-radius: 0.75rem;
-            font-family: monospace;
-            font-size: 1.1rem;
-            text-align: center;
-            border: 1px solid #c7d2fe;
+            overflow: hidden;
         }
-        .algorithm-step {
-            position: relative;
-            padding-left: 2.5rem;
-            padding-bottom: 1.5rem;
-            border-left: 2px solid #d1d5db;
-        }
-        .algorithm-step:last-child {
-            border-left: 2px solid transparent;
-            padding-bottom: 0;
-        }
-        .algorithm-step::before {
-            content: attr(data-step);
-            position: absolute;
-            left: -1.25rem;
-            top: -0.25rem;
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 50%;
-            background-color: #3b82f6;
-            color: white;
-            font-weight: bold;
+        .collapsible-header {
+            padding: 1rem;
+            cursor: pointer;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
+            font-weight: 600;
         }
-        .drive-card {
-            border-radius: 1rem;
-            padding: 1.5rem;
+        .collapsible-header:hover {
+            background-color: #f3f4f6;
         }
-        .high-drive {
-            background-color: #fff1f2;
-            border: 1px solid #ffdde1;
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 1rem;
         }
-        .low-drive {
-            background-color: #f0f9ff;
-            border: 1px solid #e0f2fe;
+        .collapsible-content.open {
+            max-height: 500px; /* Adjust as needed */
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        .collapsible-header .arrow {
+            transition: transform 0.3s ease;
+        }
+        .collapsible-header.open .arrow {
+            transform: rotate(90deg);
         }
 
     </style>
@@ -266,7 +269,7 @@
         <div id="start-screen" class="text-center">
             <div class="apple-glass p-8 md:p-12 bg-white">
                 <h2 class="text-3xl md:text-5xl font-extrabold mb-4">Patient-Ventilator Asynchrony Scenarios</h2>
-                <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto">This station includes 32 clinical scenarios. For each case, analyze the waveforms and clinical data, write your interpretation and management plan, then reveal the model answer to self-assess your key point identification.</p>
+                <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto">This station includes 39 clinical scenarios to test your ventilator waveform interpretation skills. For each case, analyze the waveforms and clinical data, write your interpretation and management plan, then reveal the model answer to self-assess your key point identification.</p>
                 <button id="start-btn" class="action-btn text-lg">
                     Begin Scenarios
                 </button>
@@ -320,20 +323,19 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const scenarios = [
-            // New Mode ID cases
             {
                 id: 'mode_id_vcv',
                 scenarioNumber: 1,
                 vignette: "A deeply sedated, paralyzed patient is being ventilated.",
                 settings: "Settings: VT: 480 mL, RR: 15, PEEP: 5, Flow: 60 L/min (constant)",
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5,15,22,22,22,15,10,5,5,5,5,5,15,22,22,22,15,10,5] }, flow: { label: 'Flow (L/min)', data: [0,60,60,60,60,-60,-40,-20,0,0,0,0,60,60,60,60,-60,-40,-20,0] }, volume: { label: 'Volume (mL)', data: [0,120,240,360,480,320,160,0,0,0,0,0,120,240,360,480,320,160,0] } },
-                question: "Identify the mode of ventilation and its phase variables (Trigger, Target, Cycle).",
+                question: "Provide a full taxonomic classification and analysis of this mode.",
                 modelAnswer: [
-                    "Mode: Volume Control Ventilation (VCV).",
-                    "Waveform Clues: Square (constant) flow waveform and ascending ramp pressure waveform.",
-                    "Trigger: Time. Breaths are initiated by the ventilator at a set rate as the patient is paralyzed.",
-                    "Target: Flow. The ventilator delivers a constant, preset flow.",
-                    "Cycle: Volume. Inspiration ends when the preset tidal volume is delivered."
+                    "<b>Taxonomy:</b> VC-CMVs (Volume Control, Continuous Mandatory Ventilation, set-point targeting).",
+                    "<b>Load:</b> Passive (Pmus ≈ 0) with normal resistance and compliance.",
+                    "<b>Trigger:</b> Time. Breaths are machine-triggered at the set rate. Synchrony is not applicable as the patient is passive.",
+                    "<b>Limit (Inspiration):</b> Flow. The ventilator delivers a constant 60 L/min flow. The ascending ramp pressure waveform is a result of this, not a target.",
+                    "<b>Cycle:</b> Volume. Inspiration ends when 480 mL is delivered. Patient and ventilator are perfectly synchronous as the patient is not contributing."
                 ]
             },
             {
@@ -342,13 +344,13 @@
                 vignette: "A deeply sedated, paralyzed patient is being ventilated.",
                 settings: "Settings: Pinsp: 15 above PEEP, RR: 15, PEEP: 8, Ti: 1.0s",
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [8, 23, 23, 23, 23, 8, 8, 8, 8, 23, 23, 23, 23, 8] }, flow: { label: 'Flow (L/min)', data: [0, 60, 45, 30, 15, -50, -30, -10, 0, 60, 45, 30, 15, -50] }, volume: { label: 'Volume (mL)', data: [0, 150, 280, 380, 450, 300, 150, 0, 0, 150, 280, 380, 450, 300] } },
-                question: "Identify the mode of ventilation and its phase variables (Trigger, Target, Cycle).",
+                question: "Provide a full taxonomic classification and analysis of this mode.",
                 modelAnswer: [
-                    "Mode: Pressure Control Ventilation (PCV).",
-                    "Waveform Clues: Square pressure waveform and decelerating flow waveform.",
-                    "Trigger: Time. Breaths are initiated by the ventilator at a set rate.",
-                    "Target: Pressure. The ventilator delivers a preset inspiratory pressure.",
-                    "Cycle: Time. Inspiration ends when the preset inspiratory time (Ti) has elapsed."
+                    "<b>Taxonomy:</b> PC-CMVs (Pressure Control, Continuous Mandatory Ventilation, set-point targeting).",
+                    "<b>Load:</b> Passive (Pmus ≈ 0) with normal resistance and compliance.",
+                    "<b>Trigger:</b> Time. Breaths are machine-triggered. Synchrony is not applicable.",
+                    "<b>Limit (Inspiration):</b> Pressure. The ventilator maintains a constant pressure of 23 cmH₂O. The decelerating flow waveform is a result of this.",
+                    "<b>Cycle:</b> Time. Inspiration ends when the set inspiratory time (1.0s) has elapsed. Patient and ventilator are perfectly synchronous."
                 ]
             },
             {
@@ -357,29 +359,29 @@
                 vignette: "A patient is awake and interacting with the ventilator during a spontaneous breathing trial.",
                 settings: "Settings: PS: 10, PEEP: 5, Flow-cycle (ETS): 25%",
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5,4.8,15,15,15,15,15,5,5,5,4.8,15,15,15,15,15,5] }, flow: { label: 'Flow (L/min)', data: [0,5,60,50,40,30,15,-40,-20,0,5,60,50,40,30,15,-40,-20,0] }, volume: { label: 'Volume (mL)', data: [0,10,100,180,250,310,400,250,100,0,10,100,180,250,310,400,250,100,0] } },
-                question: "Identify the mode of ventilation and its phase variables (Trigger, Target, Cycle).",
+                question: "Provide a full taxonomic classification and analysis of this mode.",
                 modelAnswer: [
-                    "Mode: Pressure Support Ventilation (PSV).",
-                    "Waveform Clues: Patient-initiated breaths (note the trigger dip in pressure), variable inspiratory time and tidal volume.",
-                    "Trigger: Patient (Flow or Pressure). The patient initiates every breath.",
-                    "Target: Pressure. The ventilator provides a preset level of pressure support.",
-                    "Cycle: Flow. Inspiration ends when the patient's inspiratory flow decays to a set percentage of its peak (the ETS)."
+                    "<b>Taxonomy:</b> PC-CSVs (Pressure Control, Continuous Spontaneous Ventilation, set-point), i.e., Pressure Support.",
+                    "<b>Load:</b> Spontaneously breathing patient with active Pmus.",
+                    "<b>Trigger:</b> Patient. The small dip in pressure before the rise indicates a patient-triggered breath. Synchrony is good.",
+                    "<b>Limit (Inspiration):</b> Pressure. The ventilator provides a set pressure of 15 cmH₂O. The decelerating flow is appropriate.",
+                    "<b>Cycle:</b> Flow. Inspiration ends when the patient's inspiratory flow decays to 25% of its peak. The patient controls the cycle, ensuring synchrony."
                 ]
             },
-            // Original Scenarios, renumbered
             {
                 id: 'flow_starvation',
                 scenarioNumber: 4,
                 vignette: "An ARDS patient with metabolic acidosis has a high respiratory drive and appears distressed.",
                 settings: "Mode: VCV, VT: 380mL, RR: 22, Flow: 60 L/min (constant)",
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [10, 18, 16, 17, 22, 30, 20, 12, 10, 10, 18, 16, 17, 22, 30, 20, 12, 10] }, flow: { label: 'Flow (L/min)', data: [0, 60, 60, 60, 60, 60, -50, -30, 0, 0, 60, 60, 60, 60, 60, -50, -30, 0] }, volume: { label: 'Volume (mL)', data: [0, 100, 200, 300, 380, 250, 120, 0, 0, 100, 200, 300, 380, 250, 120, 0] } },
-                question: "Interpret the waveforms and outline your management plan.",
+                question: "Provide a full taxonomic classification and analysis, identifying the asynchrony.",
                 modelAnswer: [
-                    "The concave, 'scooped' pressure waveform is the classic sign of Flow Starvation.",
-                    "This is a high-drive asynchrony where patient demand exceeds the set flow.",
-                    "Management Step 1: Increase the inspiratory flow rate (e.g., to 80-100 L/min).",
-                    "Management Step 2 (Alternative): Switch to a pressure-targeted mode (PCV or PSV) to allow for variable, patient-determined flow.",
-                    "Management Step 3: Address underlying causes of high drive (e.g., treat acidosis, pain, fever)."
+                    "<b>Taxonomy:</b> VC-CMVs.",
+                    "<b>Load:</b> High Patient Effort (Pmus) from high respiratory drive.",
+                    "<b>Trigger:</b> Patient-triggered, synchronous.",
+                    "<b>Limit Asynchrony: Flow Starvation.</b> The set constant flow (60 L/min) is insufficient for the patient's high drive. The patient's effort 'sucks down' the pressure, causing the classic concave 'scoop' in the pressure waveform.",
+                    "<b>Cycle:</b> Volume-cycled, synchronous.",
+                    "<b>Management:</b> Increase inspiratory flow, switch to a pressure-control mode, or treat the underlying cause of high respiratory drive."
                 ]
             },
             {
@@ -388,13 +390,14 @@
                 vignette: "A post-operative patient is recovering from anesthesia. You notice small dips in the pressure and flow waveforms during expiration.",
                 settings: "Mode: PSV, PS: 14, PEEP: 5, ETS: 25%",
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 19, 19, 19, 5, 4.8, 5, 4.7, 5, 5, 19, 19, 19, 5, 4.8, 5, 4.7, 5] }, flow: { label: 'Flow (L/min)', data: [0, 55, 35, 15, -40, 2, -30, 3, -20, 0, 55, 35, 15, -40, 2, -30, 3, -20] }, volume: { label: 'Volume (mL)', data: [0, 150, 300, 450, 250, 255, 120, 123, 50, 0, 150, 300, 450, 250, 255, 120, 123, 50] } },
-                question: "Identify the asynchrony and outline your management plan.",
+                question: "Provide a full taxonomic classification and analysis, identifying the asynchrony.",
                 modelAnswer: [
-                    "The small deflections in flow/pressure without a delivered breath are Ineffective Efforts (IEE).",
-                    "This is a low-drive asynchrony, often caused by over-assistance or auto-PEEP.",
-                    "Management Step 1: Reduce the Pressure Support level (e.g., to 8-10 cmH2O) to decrease over-assistance.",
-                    "Management Step 2: Ensure the trigger sensitivity is appropriate (not too difficult).",
-                    "Management Step 3: Measure for auto-PEEP and apply external PEEP to offset it if present."
+                    "<b>Taxonomy:</b> PC-CSVs (Pressure Support).",
+                    "<b>Load:</b> Low patient effort (Pmus) due to sedation and over-assistance.",
+                    "<b>Trigger Asynchrony: Ineffective Efforts.</b> The patient makes an effort (small dips in flow/pressure), but it's too weak to trigger a breath. This is often due to over-support causing respiratory depression or auto-PEEP.",
+                    "<b>Limit (Inspiration):</b> Pressure-limited on the successful breaths.",
+                    "<b>Cycle:</b> Flow-cycled on the successful breaths.",
+                    "<b>Management:</b> Reduce the level of Pressure Support to reduce over-assistance and improve trigger sensitivity. Check for auto-PEEP."
                 ]
             },
             {
@@ -403,13 +406,14 @@
                 vignette: "An ARDS patient on lung-protective ventilation (low tidal volume) is noted to be taking two breaths for every one effort.",
                 settings: "Mode: PCV, Pinsp: 15, RR: 25, Ti: 0.7s, PEEP: 12",
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [12, 27, 27, 12, 27, 27, 12, 12, 12, 27, 27, 12, 27, 27, 12] }, flow: { label: 'Flow (L/min)', data: [0, 60, 20, -10, 65, 25, -50, -20, 0, 60, 20, -10, 65, 25, -50, -20, 0] }, volume: { label: 'Volume (mL)', data: [0, 350, 350, 300, 650, 650, 300, 0, 0, 350, 350, 300, 650, 650, 300, 0] } },
-                question: "Identify the asynchrony, its main danger, and your primary intervention.",
+                question: "Provide a full taxonomic classification and analysis, identifying the asynchrony.",
                 modelAnswer: [
-                    "This is Double Triggering, a high-drive asynchrony.",
-                    "It occurs because the patient's neural inspiratory time (Ti) is longer than the set mechanical Ti.",
-                    "The primary danger is 'breath stacking', which delivers a cumulative tidal volume that can cause VILI.",
-                    "Primary Intervention: Increase the mechanical inspiratory time (e.g., Ti to 1.0-1.2s) to better match the patient's neural Ti.",
-                    "Secondary Intervention: Consider increasing the pressure target to better satisfy the patient's 'air hunger'."
+                    "<b>Taxonomy:</b> PC-CMVs.",
+                    "<b>Load:</b> High Patient Effort (Pmus) with high drive.",
+                    "<b>Trigger:</b> Patient-triggered, synchronous for the first breath.",
+                    "<b>Limit (Inspiration):</b> Pressure-limited. The delivered volume is too small for the patient's demand.",
+                    "<b>Cycle Asynchrony: Early Cycle leading to Double Triggering.</b> The set T<sub>i</sub> (0.7s) is shorter than the patient's neural T<sub>i</sub>. The first breath cycles off, but the patient continues their effort, immediately triggering a second breath.",
+                    "<b>Danger & Management:</b> This causes breath stacking and high tidal volumes. The primary fix is to increase the ventilator's T<sub>i</sub> to match the patient's neural time."
                 ]
             },
             {
@@ -418,13 +422,14 @@
                 vignette: "A patient with severe COPD on PSV appears to be actively exhaling against the ventilator.",
                 settings: "Mode: PSV, PS: 12, PEEP: 5, ETS: 10%",
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 17, 17, 17, 17, 17, 20, 17, 5, 5, 17, 17, 17, 17, 17, 20, 17, 5] }, flow: { label: 'Flow (L/min)', data: [0, 60, 40, 20, 10, 5, 2, -5, -40, 0, 60, 40, 20, 10, 5, 2, -5, -40] }, volume: { label: 'Volume (mL)', data: [0, 180, 320, 400, 430, 440, 445, 400, 200, 0, 180, 320, 400, 430, 440, 445, 400, 200, 0] } },
-                question: "Identify the asynchrony and the specific setting that needs to be adjusted.",
+                question: "Provide a full taxonomic classification and analysis, identifying the asynchrony.",
                 modelAnswer: [
-                    "The pressure spike at the end of inspiration indicates Delayed Cycling (prolonged termination).",
-                    "This occurs when the ventilator's Ti is longer than the patient's neural Ti, common in COPD.",
-                    "It forces active exhalation against the vent, increasing WOB and auto-PEEP.",
-                    "Intervention: Increase the Expiratory Trigger Sensitivity (ETS) setting (e.g., from 10% to 40-50%).",
-                    "This shortens the mechanical inspiratory time, allowing more time for exhalation."
+                    "<b>Taxonomy:</b> PC-CSVs (Pressure Support).",
+                    "<b>Load:</b> Obstructive physiology (COPD) with a short neural T<sub>i</sub>.",
+                    "<b>Trigger:</b> Patient-triggered, synchronous.",
+                    "<b>Limit (Inspiration):</b> Pressure-limited, synchronous.",
+                    "<b>Cycle Asynchrony: Delayed Cycling (Late Cycle).</b> The ventilator's flow-cycle criterion (10% ETS) results in a mechanical T<sub>i</sub> that is longer than the patient's neural T<sub>i</sub>. The patient actively exhales against the ventilator, causing the terminal pressure spike.",
+                    "<b>Management:</b> Increase the Expiratory Trigger Sensitivity (ETS) to 30-50% to shorten the mechanical T<sub>i</sub> and align it with the patient's effort."
                 ]
             },
             {
@@ -433,12 +438,14 @@
                 vignette: "A deeply sedated patient on a controlled mode of ventilation exhibits breath stacking, but the effort appears to be triggered BY the ventilator.",
                 settings: "Mode: VCV, VT: 450mL, RR: 16, PEEP: 10",
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [10, 25, 25, 22, 35, 18, 12, 10, 10, 25, 25, 22, 35, 18, 12, 10] }, flow: { label: 'Flow (L/min)', data: [0, 70, 70, 50, 65, -60, -40, 0, 0, 70, 70, 50, 65, -60, -40, 0] }, volume: { label: 'Volume (mL)', data: [0, 200, 450, 400, 680, 400, 150, 0, 0, 200, 450, 400, 680, 400, 150, 0] } },
-                question: "Identify this unique asynchrony and outline potential management strategies.",
+                question: "Provide a full taxonomic classification and analysis, identifying the asynchrony.",
                 modelAnswer: [
-                    "This is Reverse Triggering, where a passive mechanical breath entrains a reflexive diaphragmatic contraction.",
-                    "It is most common in deeply sedated patients and can be confused with double triggering.",
-                    "Management 1: Reduce the level of sedation to allow the patient's own respiratory pattern to emerge.",
-                    "Management 2: Change the ventilator rate and/or tidal volume to disrupt the entrainment pattern."
+                    "<b>Taxonomy:</b> VC-CMVs.",
+                    "<b>Load:</b> Passive patient (Pmus should be 0).",
+                    "<b>Trigger Asynchrony: Reverse Triggering.</b> The breath is initiated by the machine (time-triggered). This passive inflation then causes a reflexive diaphragmatic contraction (patient effort) during the breath.",
+                    "<b>Limit (Inspiration):</b> The patient's effort augments the breath, causing a second stacked breath.",
+                    "<b>Cycle:</b> The asynchrony can lead to double triggering and delivery of large volumes.",
+                    "<b>Management:</b> Reduce sedation to allow the patient's own drive to emerge, or change ventilator rate/volume to break the entrainment."
                 ]
             },
             {
@@ -447,13 +454,13 @@
                 vignette: "A patient with a low respiratory drive is being ventilated. The ventilator is delivering breaths at a rate higher than the set rate, with no corresponding patient effort.",
                 settings: "Mode: A/C, RR: 12, Trigger Sensitivity: 1 L/min",
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 15, 15, 5, 5, 15, 15, 5, 15, 15, 5, 15, 15, 5, 15, 15, 5] }, flow: { label: 'Flow (L/min)', data: [0, 50, 10, -40, 0, 50, 10, -40, 0, 50, 10, -40, 0, 50, 10, -40, 0, 50, 10, -40] }, volume: { label: 'Volume (mL)', data: [0, 400, 400, 0, 0, 400, 400, 0, 0, 400, 400, 0, 0, 400, 400, 0] } },
-                question: "Identify the asynchrony and list the steps to troubleshoot it.",
+                question: "Provide a full taxonomic classification and analysis, identifying the asynchrony.",
                 modelAnswer: [
-                    "The ventilator is delivering breaths without patient effort, which is Auto-Triggering.",
-                    "This is caused by an overly sensitive trigger or artifacts in the circuit.",
-                    "Troubleshooting 1: Check the entire ventilator circuit for leaks (cuff, connections).",
-                    "Troubleshooting 2: Drain any condensation (water) from the circuit tubing.",
-                    "Troubleshooting 3: If no physical cause is found, decrease the trigger sensitivity (e.g., from 1 L/min to 3 L/min)."
+                    "<b>Taxonomy:</b> Any assist mode (e.g., PC-CMV or VC-CMV).",
+                    "<b>Load:</b> Passive patient.",
+                    "<b>Trigger Asynchrony: Auto-triggering (False Trigger).</b> The ventilator is delivering breaths without any patient effort. This is caused by an artifact (e.g., circuit leak, condensation, cardiac oscillations) that fools the ventilator's trigger sensor.",
+                    "<b>Limit/Cycle:</b> The subsequent breath phases are carried out by the machine.",
+                    "<b>Management:</b> First, search for a physical cause (check for leaks, drain water from tubing). If none is found, make the trigger less sensitive (e.g., increase from 1 L/min to 3 L/min)."
                 ]
             },
             {
@@ -462,12 +469,14 @@
                 vignette: "A patient in PCV mode has a high inspiratory drive. You observe the following flow waveform.",
                 settings: "Mode: PCV, Pinsp: 15, PEEP: 8",
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [8, 23, 23, 23, 23, 23, 15, 8, 8, 23, 23, 23, 23, 23, 15, 8] }, flow: { label: 'Flow (L/min)', data: [0, 60, 40, 45, 30, 10, -50, -20, 0, 60, 40, 45, 30, 10, -50, -20, 0] }, volume: { label: 'Volume (mL)', data: [0, 200, 350, 480, 550, 600, 300, 100, 0, 200, 350, 480, 550, 600, 300, 100, 0] } },
-                question: "Interpret the flow waveform and describe the management.",
+                question: "Provide a full taxonomic classification and analysis, identifying the asynchrony.",
                 modelAnswer: [
-                    "The flow waveform initially decelerates but then rises again, creating a 'camel back' shape.",
-                    "This indicates inadequate driving pressure; the patient's effort is still high and they are 'sucking' for more flow.",
-                    "Management: Increase the driving pressure (inspiratory pressure setting) in 2 cmH2O increments.",
-                    "The goal is to provide enough support so the flow waveform shows a smooth, passive deceleration to baseline."
+                    "<b>Taxonomy:</b> PC-CMVs.",
+                    "<b>Load:</b> High Patient Effort (Pmus).",
+                    "<b>Trigger:</b> Patient-triggered, synchronous.",
+                    "<b>Limit Asynchrony: Inadequate Driving Pressure (Work Shifting).</b> The set pressure (15 cmH2O) is insufficient. The patient's continued effort distorts the flow waveform, causing a secondary rise (a 'camel back' shape) instead of a smooth decay.",
+                    "<b>Cycle:</b> Time-cycled, synchronous.",
+                    "<b>Management:</b> Increase the inspiratory pressure setting in 2 cmH2O increments until the flow waveform shows a smooth, passive deceleration."
                 ]
             },
             {
@@ -478,10 +487,12 @@
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 8, 12, 16, 23, 23, 23, 15, 5, 5, 8, 12, 16, 23, 23, 23, 15, 5] }, flow: { label: 'Flow (L/min)', data: [0, 30, 50, 70, 60, 40, 20, -60, -30, 0, 30, 50, 70, 60, 40, 20, -60, -30, 0] }, volume: { label: 'Volume (mL)', data: [0, 100, 250, 400, 500, 550, 580, 300, 100, 0, 100, 250, 400, 500, 550, 580, 300, 100, 0] } },
                 question: "Analyze the pressure waveform and explain how to fix this issue.",
                 modelAnswer: [
-                    "The pressure waveform shows a slow, sloped rise to the target pressure, instead of a sharp, square shape.",
-                    "This is caused by a pressurization rate (rise time) that is set too slow.",
-                    "This increases the work of breathing as the patient's demand is not met quickly.",
-                    "Intervention: Increase the pressurization rate (shorten the rise time) until the pressure waveform becomes nearly square."
+                    "<b>Taxonomy:</b> PC-CMVs.",
+                    "<b>Load:</b> High Patient Effort (Pmus) at the onset of inspiration.",
+                    "<b>Trigger:</b> Patient-triggered.",
+                    "<b>Limit Asynchrony: Slow Pressurization.</b> The rise time is set too slow. The pressure waveform has a sloped, delayed rise to target, increasing the work of breathing as the patient's initial demand is not met.",
+                    "<b>Cycle:</b> Time-cycled.",
+                    "<b>Management:</b> Decrease the rise time (increase the pressurization rate) until the initial part of the pressure waveform is nearly square without overshoot."
                 ]
             },
             {
@@ -492,10 +503,12 @@
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 22, 20, 20, 20, 10, 5, 5, 22, 20, 20, 20, 10, 5] }, flow: { label: 'Flow (L/min)', data: [0, 90, 60, 40, 20, -70, -40, 0, 90, 60, 40, 20, -70, -40, 0] }, volume: { label: 'Volume (mL)', data: [0, 200, 350, 450, 500, 250, 100, 0, 200, 350, 450, 500, 250, 100, 0] } },
                 question: "Identify the issue on the pressure waveform and describe the management.",
                 modelAnswer: [
-                    "The pressure waveform has a sharp spike or 'overshoot' above the target pressure at the start of the breath.",
-                    "This is caused by a pressurization rate (rise time) that is set too fast.",
-                    "This can be uncomfortable for the patient and may lead to premature cycling.",
-                    "Intervention: Decrease the pressurization rate (lengthen the rise time) until the overshoot is eliminated and the waveform is square."
+                    "<b>Taxonomy:</b> PC-CSVs (Pressure Support).",
+                    "<b>Load:</b> Normal patient effort.",
+                    "<b>Trigger:</b> Patient-triggered.",
+                    "<b>Limit Asynchrony: Fast Pressurization (Overshoot).</b> The rise time is set too fast, causing a pressure spike above the target at the start of the breath. This can be uncomfortable and may cause premature cycling.",
+                    "<b>Cycle:</b> Flow-cycled.",
+                    "<b>Management:</b> Increase the rise time (slow the pressurization rate) until the overshoot is eliminated and the waveform is square."
                 ]
             },
             {
@@ -504,12 +517,14 @@
                 vignette: "You are titrating settings for an ARDS patient in PCV. You notice the following flow waveform.",
                 settings: "Mode: PCV, Pinsp: 20, PEEP: 10, Ti: 0.6s",
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [10, 30, 30, 30, 20, 10, 10, 30, 30, 30, 20, 10] }, flow: { label: 'Flow (L/min)', data: [0, 80, 50, 30, -60, -30, 0, 80, 50, 30, -60, -30, 0] }, volume: { label: 'Volume (mL)', data: [0, 200, 350, 420, 200, 50, 0, 200, 350, 420, 200, 50, 0] } },
-                question: "Interpret this flow waveform and explain the consequence and correction.",
+                question: "Provide a full taxonomic classification and analysis, identifying the asynchrony.",
                 modelAnswer: [
-                    "The inspiratory flow waveform is terminating (cycling off) while still significantly above zero.",
-                    "This indicates that the set inspiratory time (Ti) is too short for the patient's respiratory mechanics.",
-                    "Consequence: This leads to incomplete alveolar filling, reduced tidal volume, and suboptimal gas exchange.",
-                    "Intervention: Increase the inspiratory time (Ti) until the inspiratory flow just reaches zero at the end of inspiration."
+                    "<b>Taxonomy:</b> PC-CMVs.",
+                    "<b>Load:</b> Restrictive physiology (ARDS).",
+                    "<b>Trigger:</b> Patient or time-triggered.",
+                    "<b>Limit (Inspiration):</b> Pressure-limited.",
+                    "<b>Cycle Asynchrony: Premature Cycling.</b> The inspiratory flow waveform terminates while still significantly above zero. This means the set T<sub>i</sub> (0.6s) is too short for the lung's time constant, leading to incomplete delivery of the breath.",
+                    "<b>Management:</b> Increase the inspiratory time (T<sub>i</sub>) until the inspiratory flow just reaches zero at the end of inspiration to ensure full alveolar filling."
                 ]
             },
             {
@@ -520,11 +535,10 @@
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 15, 28, 22, 22, 22, 22, 22, 12, 5, 5, 5, 15, 28, 12, 5] }, flow: { label: 'Flow (L/min)', data: [0, 60, 60, 0, 0, 0, 0, 0, -50, -20, 0, 0, 60, 60, -50, -20] }, volume: { label: 'Volume (mL)', data: [0, 200, 450, 450, 450, 450, 450, 450, 250, 0, 0, 0, 200, 450, 250, 0] } },
                 question: "What maneuver is being performed, and what is its primary purpose?",
                 modelAnswer: [
-                    "Maneuver: An end-inspiratory hold (or inspiratory pause) is being performed.",
-                    "Waveform Clue: The flow drops to zero at the end of inspiration, while the volume is held constant.",
-                    "Waveform Clue: During the hold, the pressure drops from the Peak Inspiratory Pressure (PIP) to the Plateau Pressure (Pplat).",
-                    "Purpose: To measure the Plateau Pressure (Pplat), which reflects alveolar pressure under no-flow conditions.",
-                    "This measurement is essential for calculating Static Compliance and Driving Pressure."
+                    "<b>Maneuver:</b> End-inspiratory hold (inspiratory pause).",
+                    "<b>Analysis:</b> At the end of a VCV breath, flow is stopped (note flow at zero during the pause). This allows airway pressure to equilibrate with alveolar pressure.",
+                    "<b>Measurement:</b> The pressure drops from the Peak Inspiratory Pressure (PIP) to the Plateau Pressure (Pplat).",
+                    "<b>Purpose:</b> To measure Pplat, which is a surrogate for alveolar pressure and is crucial for calculating static compliance and driving pressure to assess lung safety."
                 ]
             },
             {
@@ -535,10 +549,12 @@
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [12, 20, 32, 25, 25, 25, 18, 12, 12, 20, 32, 18, 12] }, flow: { label: 'Flow (L/min)', data: [0, 60, 60, 0, 0, 0, -50, -20, 0, 60, 60, -50, -20, 0] }, volume: { label: 'Volume (mL)', data: [0, 210, 420, 420, 420, 420, 200, 0, 0, 210, 420, 200, 0] } },
                 question: "Calculate the Driving Pressure (ΔP) and Static Compliance (Cst) and interpret their significance.",
                 modelAnswer: [
-                    "Driving Pressure (ΔP) = Pplat - PEEP = 25 - 12 = 13 cmH₂O.",
+                    "<b>Driving Pressure (ΔP) = Pplat - PEEP</b>",
+                    "Calculation: ΔP = 25 - 12 = 13 cmH₂O.",
                     "Significance: ΔP < 15 cmH₂O is a key target for lung-protective ventilation and is associated with better outcomes.",
-                    "Static Compliance (Cst) = VT / (Pplat - PEEP) = 420 / 13 = 32.3 mL/cmH₂O.",
-                    "Significance: This is a low compliance, characteristic of ARDS."
+                    "<b>Static Compliance (Cst) = VT / (Pplat - PEEP)</b>",
+                    "Calculation: Cst = 420 / 13 = 32.3 mL/cmH₂O.",
+                    "Significance: This represents low compliance, characteristic of ARDS."
                 ]
             },
             {
@@ -549,10 +565,10 @@
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 25, 45, 20, 20, 20, 12, 5, 5, 25, 45, 12, 5] }, flow: { label: 'Flow (L/min)', data: [0, 60, 60, 0, 0, 0, -50, -20, 0, 60, 60, -50, -20, 0] }, volume: { label: 'Volume (mL)', data: [0, 250, 500, 500, 500, 500, 250, 0, 0, 250, 500, 250, 0] } },
                 question: "Calculate the airway resistance (Raw) and interpret the finding.",
                 modelAnswer: [
-                    "Airway Resistance (Raw) = (PIP - Pplat) / Flow.",
-                    "Calculation: Raw = (45 - 20) / 1 = 25 cmH₂O/L/sec.",
-                    "Interpretation: This is a very high resistance (Normal is <10).",
-                    "This confirms severe bronchospasm is the cause of the high peak pressure."
+                    "<b>Airway Resistance (Raw) = (PIP - Pplat) / Flow</b>",
+                    "Calculation: Raw = (45 - 20) / 1 L/sec = 25 cmH₂O/L/sec.",
+                    "Interpretation: This is a very high resistance (Normal is <10 cmH₂O/L/sec).",
+                    "This confirms that severe bronchospasm (high resistive load) is the cause of the high peak pressure, not a change in the lungs themselves."
                 ]
             },
             {
@@ -563,10 +579,11 @@
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 20, 15, 5, 5, 5, 5, 5, 12, 12, 12, 12, 12, 5, 20, 15, 5] }, flow: { label: 'Flow (L/min)', data: [0, 60, 40, -50, -30, -15, 0, 0, 0, 0, 0, 0, 0, 0, 60, 40, -50] }, volume: { label: 'Volume (mL)', data: [0, 250, 450, 300, 150, 100, 100, 100, 100, 100, 100, 100, 100, 0, 250, 450, 300] } },
                 question: "Based on the graphic, what maneuver was performed and what did it reveal?",
                 modelAnswer: [
-                    "An end-expiratory hold (expiratory pause) was performed.",
-                    "During the hold, the pressure rises from the set PEEP of 5 to a plateau of 12 cmH2O. This is the Total PEEP.",
-                    "Auto-PEEP (PEEPi) = Total PEEP - Set PEEP = 12 - 5 = 7 cmH2O.",
-                    "This confirms the presence of significant auto-PEEP, which increases work of breathing."
+                    "<b>Maneuver:</b> End-expiratory hold (expiratory pause).",
+                    "<b>Analysis:</b> At the end of exhalation, flow is held at zero. The pressure in the circuit rises from the set PEEP to equilibrate with the trapped alveolar pressure.",
+                    "<b>Measurement:</b> The pressure rises from the set PEEP of 5 to a plateau of 12 cmH2O. This is the Total PEEP.",
+                    "<b>Auto-PEEP (PEEPi) = Total PEEP - Set PEEP</b> = 12 - 5 = 7 cmH2O.",
+                    "Significance: This confirms and quantifies the amount of gas trapping, which increases work of breathing."
                 ]
             },
             {
@@ -574,12 +591,13 @@
                 scenarioNumber: 18,
                 vignette: "A patient is failing a spontaneous breathing trial with signs of distress. You perform a P0.1 maneuver.",
                 settings: "The measured P0.1 is -7.2 cmH2O.",
+                chartData: {},
                 question: "Interpret the P0.1 value and what it implies about the patient's readiness for extubation.",
                 modelAnswer: [
-                    "P0.1 is the airway pressure drop in the first 100ms of an occluded inspiration.",
-                    "It is a measure of central respiratory drive and inspiratory effort.",
-                    "A P0.1 more negative than -4 to -5 cmH2O indicates excessive work of breathing.",
-                    "This value of -7.2 is very high and indicates the patient is at high risk of muscle fatigue and will likely fail extubation."
+                    "<b>Measurement:</b> P0.1 (Airway Occlusion Pressure at 100ms).",
+                    "<b>Purpose:</b> It is a measure of central respiratory drive and inspiratory effort, independent of respiratory mechanics.",
+                    "<b>Interpretation:</b> A P0.1 more negative than -4 to -5 cmH2O indicates excessive work of breathing and high respiratory drive.",
+                    "<b>Conclusion:</b> This value of -7.2 is very high and indicates the patient is at high risk of muscle fatigue and will likely fail extubation."
                 ]
             },
             {
@@ -590,10 +608,10 @@
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [8, 20, 20, 8, 8, 8, 8, 8, 20, 20, 8] }, flow: { label: 'Flow (L/min)', data: [0, 60, 20, -50, -48, -52, -47, -53, -48, -51, -20, 0, 0, 60, 20, -50, -48, -52, -47, -53, -48, -51, -20, 0] }, volume: { label: 'Volume (mL)', data: [0, 200, 400, 200, 195, 205, 190, 210, 195, 205, 100, 0, 0, 200, 400, 200, 195, 205, 190, 210, 195, 205, 100, 0] } },
                 question: "What is the likely cause of these flow waveform artifacts, and how would you differentiate them from ineffective efforts?",
                 modelAnswer: [
-                    "The regular, rhythmic oscillations synchronized with the heartbeat are characteristic of Cardiac Oscillations.",
-                    "They are caused by the physical movement of the heart and great vessels transmitting pressure/flow changes to the circuit.",
-                    "To differentiate from IEE: Observe the patient's chest and abdomen for corresponding muscle contractions. IEE will have visible effort.",
-                    "To differentiate from IEE: Palpate the patient's pulse. Cardiac oscillations will be perfectly synchronous with the pulse, whereas IEE will not."
+                    "<b>Artifact:</b> Cardiac Oscillations.",
+                    "<b>Mechanism:</b> The physical movement of the heart and great vessels transmits pressure and flow changes to the circuit, creating small, regular oscillations.",
+                    "<b>Differentiation from Ineffective Efforts (IEE):</b> Cardiac oscillations are perfectly regular and synchronous with the patient's pulse.",
+                    "IEE corresponds to diaphragmatic contraction and will not be perfectly regular or synchronous with the pulse. IEE may also have visible chest/abdominal movement."
                 ]
             },
             {
@@ -602,12 +620,13 @@
                 vignette: "A patient with a very low respiratory drive has the following pressure waveform.",
                 settings: "N/A",
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 5, 5, 4.8, 4.7, 4.6, 5, 15, 15, 5, 5, 5, 5, 4.8, 4.7, 4.6, 5, 15, 15, 5] }, flow: { label: 'Flow (L/min)', data: [0, 0, 0, 1, 2, 3, 5, 40, 20, -30, -10, 0, 0, 1, 2, 3, 5, 40, 20, -30, -10, 0] }, volume: { label: 'Volume (mL)', data: [0, 0, 0, 5, 10, 15, 25, 200, 300, 150, 50, 0, 0, 5, 10, 15, 25, 200, 300, 150, 50, 0] } },
-                question: "Identify the asynchrony shown in the trigger phase of the breath.",
+                question: "Provide a full taxonomic classification and analysis, identifying the asynchrony.",
                 modelAnswer: [
-                    "The waveform shows a patient effort (dip in pressure below PEEP).",
-                    "However, there is a significant lag or delay before the ventilator delivers the supported breath.",
-                    "This is known as Trigger Delay or inspiratory time delay.",
-                    "It is often caused by a very weak patient effort or, in older ventilators, slow response times."
+                    "<b>Taxonomy:</b> Any patient-triggered mode.",
+                    "<b>Load:</b> Very low patient effort (Pmus).",
+                    "<b>Trigger Asynchrony: Trigger Delay.</b> The waveform shows a patient effort (the initial slow dip in pressure and rise in flow). However, there is a significant lag before the ventilator's algorithm recognizes the effort and delivers the supported breath.",
+                    "<b>Cause:</b> This is often caused by a very weak patient effort or, in older ventilators, slow valve response times.",
+                    "<b>Management:</b> Ensure the trigger is set appropriately sensitive. If the patient effort is too low, they may require more ventilatory support."
                 ]
             },
             {
@@ -615,12 +634,14 @@
                 scenarioNumber: 21,
                 vignette: "A septic patient with a vigorous respiratory drive is on an Adaptive Pressure Control mode (e.g., PRVC, VC+). The target tidal volume is 450 mL.",
                 settings: "The ventilator is delivering a PIP of only 12 cmH2O, and the patient appears uncomfortable.",
-                question: "Explain why the adaptive mode is failing this patient and what should be done.",
+                chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [8, 20, 20, 20, 8, 8, 18, 18, 18, 8, 8, 16, 16, 16, 8] }, flow: { label: 'Flow (L/min)', data: [0, 50, 45, 30, -40, 0, 60, 55, 40, -50, 0, 70, 65, 50, -60] }, volume: { label: 'Volume (mL)', data: [0, 200, 350, 450, 200, 0, 250, 450, 600, 300, 0, 300, 500, 700, 350] } },
+                question: "Provide a full taxonomic classification and analysis, identifying the asynchrony.",
                 modelAnswer: [
-                    "Adaptive Pressure Control modes titrate pressure down if the delivered volume exceeds the target.",
-                    "The patient's high inspiratory effort is generating a large portion of the tidal volume, 'tricking' the ventilator into thinking less support is needed.",
-                    "This results in a premature weaning of driving pressure and inadequate respiratory muscle unloading, causing distress.",
-                    "Intervention: Switch to a standard Pressure Control (PCV) or Volume Control (VCV) mode to provide a fixed, guaranteed level of support."
+                    "<b>Taxonomy:</b> PC-CMVa (Pressure Control, Continuous Mandatory Ventilation, adaptive targeting).",
+                    "<b>Load:</b> High Patient Effort (Pmus).",
+                    "<b>Trigger/Cycle:</b> Synchronous.",
+                    "<b>Limit Asynchrony: Work Shifting.</b> The patient's high effort contributes significantly to the tidal volume. The adaptive algorithm sees the resulting high volume (>450mL) and reduces the pressure support on subsequent breaths. This forces the patient to take on more work, leading to a vicious cycle of under-assistance.",
+                    "<b>Management:</b> Increase the target volume to better match the patient's demand, or switch to a non-adaptive mode (standard PCV or VCV) to provide guaranteed support."
                 ]
             },
              {
@@ -628,12 +649,15 @@
                 scenarioNumber: 22,
                 vignette: "A patient is being ventilated in Adaptive Support Ventilation (ASV). The patient has a high respiratory drive and is taking rapid, shallow breaths.",
                 settings: "ASV %MinVol: 100%",
+                chartData: {},
                 question: "Why might ASV be allowing this potentially injurious breathing pattern, and what is a key safety feature of the mode?",
                 modelAnswer: [
-                    "ASV uses a least work of breathing algorithm. If a patient's drive is very high, the path of least resistance may be rapid, shallow breathing.",
-                    "This pattern can lead to diaphragm fatigue and may not be optimal for lung recruitment.",
-                    "A key safety feature is that ASV will not allow the tidal volume to fall below a calculated minimum (based on dead space) to prevent excessive dead-space ventilation.",
-                    "Management may involve increasing the %MinVol target to encourage larger, slower breaths, or switching to a different mode if the pattern persists."
+                    "<b>Taxonomy:</b> ASV is a proprietary servo-targeting mode.",
+                    "<b>Load:</b> High Patient Effort (Pmus) with a preference for rapid, shallow breathing.",
+                    "<b>Asynchrony:</b> ASV is allowing a potentially harmful breathing pattern. The 'least work of breathing' algorithm may determine that rapid, shallow breathing is the most 'efficient' pattern for a patient with very high drive, even if it's not physiologically optimal.",
+                    "<b>Risk:</b> This pattern can lead to diaphragm fatigue and poor lung recruitment.",
+                    "<b>Safety Feature:</b> ASV has built-in rules to prevent excessive dead-space ventilation by enforcing a minimum tidal volume.",
+                    "<b>Management:</b> Increase the %MinVol target to encourage larger, slower breaths, or switch to a different mode if the pattern persists."
                 ]
             },
             {
@@ -644,12 +668,12 @@
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 15, 25, 18, 5, 5, 15, 25, 18, 5] }, flow: { label: 'Flow (L/min)', data: [0, 60, 60, -50, -30, -15, 60, 60, -50, -30, -15] }, volume: { label: 'Volume (mL)', data: [50, 250, 530, 350, 200, 100, 300, 580, 400, 250, 150] } },
                 question: "Identify the primary pathology visible on the flow-time scalar and outline your management priorities.",
                 modelAnswer: [
-                    "The expiratory flow fails to return to zero before the next inspiration, indicating dynamic hyperinflation and Auto-PEEP (gas trapping).",
-                    "This is common in obstructive lung disease due to prolonged expiratory time constants.",
-                    "Management Priority 1: Maximize expiratory time. Decrease the respiratory rate (e.g., to 14-16 bpm).",
-                    "Management Priority 2: Shorten inspiratory time. Increase the inspiratory flow rate (e.g., from 60 to 80 L/min).",
-                    "Management Priority 3: Treat the underlying obstruction (e.g., with bronchodilators).",
-                    "Consider measuring auto-PEEP with an expiratory hold to quantify the problem."
+                    "<b>Pathology:</b> Auto-PEEP (Dynamic Hyperinflation).",
+                    "<b>Analysis:</b> The expiratory flow fails to return to zero before the next inspiration begins. This indicates that exhalation is incomplete, leading to gas trapping. The volume waveform also shows a rising end-expiratory baseline.",
+                    "<b>Cause:</b> Insufficient expiratory time, common in obstructive lung disease (COPD) combined with a high respiratory rate.",
+                    "<b>Management 1 (Maximize Expiratory Time):</b> Decrease the respiratory rate (e.g., to 14-16 bpm).",
+                    "<b>Management 2 (Shorten Inspiratory Time):</b> Increase the inspiratory flow rate (e.g., from 60 to 80 L/min).",
+                    "<b>Management 3 (Treat Obstruction):</b> Administer bronchodilators."
                 ]
             },
             {
@@ -657,13 +681,13 @@
                 scenarioNumber: 24,
                 vignette: "A patient's ventilator waveforms suddenly appear erratic and jagged.",
                 settings: "N/A",
-                chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 15, 14, 16, 15, 17, 10, 5, 5, 15, 14, 16, 15, 17, 10, 5] }, flow: { label: 'Flow (L/min)', data: [0, 60, 60, 60, 60, -40, -42, -38, -41, -37, -40, -36, -39, -35, -38, -34, -37, -33, -36, -32, 0, 0, 60, 60, 60, 60, -40, -42, -38, -41, -37, -40, -36, -39, -35, -38, -34, -37, -33, -36, -32, 0] }, volume: { label: 'Volume (mL)', data: [0, 150, 300, 450, 300, 290, 310, 280, 150, 0, 0, 150, 300, 450, 300, 290, 310, 280, 150, 0] } },
+                chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 15, 14, 16, 15, 17, 10, 5, 5, 15, 14, 16, 15, 17, 10, 5] }, flow: { label: 'Flow (L/min)', data: [0, 60, 58, 62, 57, -40, -42, -38, -41, 0, 60, 58, 62, 57, -40, -42, -38, -41, 0] }, volume: { label: 'Volume (mL)', data: [0, 150, 300, 450, 300, 290, 310, 280, 150, 0, 150, 300, 450, 300, 290, 310, 280, 150, 0] } },
                 question: "Identify the cause of the oscillations on the flow waveform.",
                 modelAnswer: [
-                    "The 'sawtooth' pattern on the flow waveform is characteristic of turbulent airflow.",
-                    "This is most commonly caused by Secretions in the airway.",
-                    "It can also be caused by condensation (water) in the ventilator circuit.",
-                    "The primary intervention is to suction the patient and drain any water from the circuit."
+                    "<b>Artifact:</b> Secretions or condensation.",
+                    "<b>Analysis:</b> The chaotic, 'sawtooth' pattern on the flow and pressure waveforms is characteristic of turbulent airflow.",
+                    "<b>Cause:</b> This is most commonly caused by secretions in the major airways or condensation (water) in the ventilator circuit.",
+                    "<b>Management:</b> The primary intervention is to suction the patient's airway and drain any water from the circuit tubing."
                 ]
             },
             {
@@ -674,11 +698,10 @@
                 chartData: { pressure: { label: 'ETCO₂ (mmHg)', data: [0, 5, 15, 25, 35, 40, 30, 10, 0, 5, 15, 25, 35, 40, 30, 10, 0] } },
                 question: "Interpret this capnography waveform.",
                 modelAnswer: [
-                    "The waveform shows a sloped, prolonged upstroke (Phase II), losing the normal rectangular shape.",
-                    "This is known as a 'shark fin' capnogram.",
-                    "It is characteristic of bronchoconstriction or airway obstruction.",
-                    "The sloped shape is caused by the slow and uneven emptying of alveoli with different time constants.",
-                    "This can be used to monitor the response to bronchodilator therapy."
+                    "<b>Waveform:</b> 'Shark fin' capnogram.",
+                    "<b>Analysis:</b> The waveform shows a sloped, prolonged upstroke (Phase II) and a down-sloping alveolar plateau (Phase III), losing the normal rectangular shape.",
+                    "<b>Pathophysiology:</b> This is characteristic of bronchoconstriction or airway obstruction. The shape is caused by the slow and uneven emptying of alveoli with different time constants.",
+                    "<b>Clinical Use:</b> This can be used to diagnose obstruction and monitor the response to bronchodilator therapy (the waveform should become more rectangular)."
                 ]
             },
             {
@@ -689,11 +712,11 @@
                 chartData: { pressure: { label: 'ETCO₂ (mmHg)', data: [8, 15, 30, 38, 38, 30, 15, 8, 8, 15, 30, 38, 38, 30, 15, 8] } },
                 question: "Interpret this capnography waveform and list potential causes.",
                 modelAnswer: [
-                    "The baseline of the capnogram is elevated and does not return to zero.",
-                    "This indicates rebreathing of exhaled carbon dioxide.",
-                    "Cause 1: Insufficient inspiratory flow in the circuit, allowing exhaled gas to remain.",
-                    "Cause 2: A faulty expiratory valve in the ventilator circuit.",
-                    "Cause 3: Inadequate fresh gas flow in some anesthesia circuits."
+                    "<b>Waveform:</b> Elevated baseline capnography.",
+                    "<b>Analysis:</b> The baseline of the capnogram (Phase 0) is elevated and does not return to zero. This indicates that the patient is rebreathing exhaled carbon dioxide.",
+                    "<b>Cause 1 (Circuit):</b> Insufficient fresh gas flow in the circuit or a faulty/stuck expiratory valve.",
+                    "<b>Cause 2 (Patient):</b> Unlikely to be a primary patient issue; this is almost always a circuit or ventilator problem.",
+                    "<b>Management:</b> Immediately check the ventilator circuit, valves, and fresh gas flow settings."
                 ]
             },
             {
@@ -704,11 +727,11 @@
                 chartData: { pressure: { label: 'Airway Pressure (cmH₂O)', data: [10, 25, 25, 10, 10, 25, 25, 10] }, flow: { label: 'Esophageal Pressure (Pes)', data: [0, -2, -8, -15, -12, -5, 0, 0, -2, -8, -15, -12, -5, 0] } },
                 question: "Interpret the esophageal pressure (Pes) waveform and calculate the peak inspiratory transpulmonary pressure.",
                 modelAnswer: [
-                    "The negative deflection in the Pes waveform represents the patient's inspiratory effort.",
-                    "The magnitude of the swing in Pes (ΔPes) from baseline is about 15 cmH2O, indicating significant patient effort.",
-                    "Transpulmonary Pressure (PL) = Airway Pressure (Paw) - Pleural Pressure (Pes).",
-                    "At peak inspiration: PL = Peak Paw - Peak Negative Pes = 25 - (-15) = 40 cmH2O.",
-                    "This high transpulmonary pressure, even with acceptable Paw, indicates a risk of patient self-inflicted lung injury (P-SILI)."
+                    "<b>Measurement:</b> Esophageal pressure (Pes), a surrogate for pleural pressure.",
+                    "<b>Analysis:</b> The negative deflection in the Pes waveform represents the patient's inspiratory effort (Pmus). The magnitude of the swing (ΔPes) is about 15 cmH2O, indicating very significant patient effort.",
+                    "<b>Transpulmonary Pressure (P<sub>L</sub>) = Airway Pressure (P<sub>aw</sub>) - Pleural Pressure (P<sub>es</sub>).</b>",
+                    "<b>Calculation:</b> At peak inspiration, P<sub>L</sub> = Peak P<sub>aw</sub> - Peak Negative P<sub>es</sub> = 25 - (-15) = 40 cmH2O.",
+                    "<b>Significance:</b> This high transpulmonary pressure, even with an acceptable airway pressure, indicates a high risk of patient self-inflicted lung injury (P-SILI)."
                 ]
             },
             {
@@ -716,13 +739,14 @@
                 scenarioNumber: 28,
                 vignette: "A patient is undergoing a spontaneous breathing trial on minimal support (PS 5, PEEP 5).",
                 settings: "Measured Respiratory Rate is 30 breaths/min. Measured Tidal Volume is 300 mL.",
+                chartData: {},
                 question: "Calculate the Rapid Shallow Breathing Index (RSBI) and interpret its meaning for weaning.",
                 modelAnswer: [
-                    "RSBI = Respiratory Rate / Tidal Volume (in Liters).",
-                    "Tidal Volume = 300 mL = 0.3 L.",
-                    "Calculation: RSBI = 30 / 0.3 = 100.",
-                    "Interpretation: An RSBI < 105 is generally considered predictive of successful weaning.",
-                    "This patient is on the threshold, and other clinical factors must be considered, but this value supports continuing toward extubation."
+                    "<b>Measurement:</b> Rapid Shallow Breathing Index (RSBI).",
+                    "<b>Formula: RSBI = Respiratory Rate / Tidal Volume (in Liters).</b>",
+                    "<b>Calculation:</b> Tidal Volume = 300 mL = 0.3 L. RSBI = 30 / 0.3 = 100.",
+                    "<b>Interpretation:</b> An RSBI < 105 is generally considered predictive of successful weaning.",
+                    "<b>Conclusion:</b> This patient is on the threshold. While this single value is acceptable, it should be considered along with other clinical factors before extubation."
                 ]
             },
             {
@@ -730,13 +754,13 @@
                 scenarioNumber: 29,
                 vignette: "A patient in VCV mode suddenly has a high pressure alarm. The PIP has jumped from 25 to 50 cmH2O.",
                 settings: "Mode: VCV, VT: 450mL. An inspiratory hold shows Pplat is unchanged at 18 cmH2O.",
+                chartData: {},
                 question: "Based on the pressures, what is the most likely cause of the alarm?",
                 modelAnswer: [
-                    "The Peak Inspiratory Pressure (PIP) has dramatically increased.",
-                    "The Plateau Pressure (Pplat) has remained unchanged.",
-                    "The difference (PIP - Pplat) represents the resistive pressure.",
-                    "A large increase in resistive pressure without a change in plateau pressure points to an obstruction in the circuit or airway.",
-                    "Most likely cause: Kinked endotracheal tube, mucus plugging, or patient biting the tube."
+                    "<b>Load Analysis:</b> Acutely High Resistive Load (↑R).",
+                    "<b>Analysis:</b> The Peak Inspiratory Pressure (PIP) has dramatically increased, but the Plateau Pressure (Pplat) has remained unchanged.",
+                    "<b>Interpretation:</b> The difference (PIP - Pplat) represents the pressure needed to overcome resistance. A large, sudden increase in this gradient points to an acute obstruction in the circuit or airway.",
+                    "<b>Most Likely Cause:</b> Kinked endotracheal tube, mucus plugging, or the patient biting the tube."
                 ]
             },
             {
@@ -744,12 +768,13 @@
                 scenarioNumber: 30,
                 vignette: "A patient with ARDS suddenly becomes hypotensive, tachycardic, and difficult to ventilate. PIP and Pplat are both rising.",
                 settings: "Mode: PCV. Tidal volumes are now dropping despite the same pressure settings.",
+                chartData: {},
                 question: "What catastrophic event do these signs and ventilator changes suggest?",
                 modelAnswer: [
-                    "The combination of sudden hemodynamic collapse and worsening respiratory mechanics is highly suggestive of a tension pneumothorax.",
-                    "The rising PIP and Pplat indicate a sudden decrease in respiratory system compliance.",
-                    "In PCV, a decrease in compliance will result in a lower delivered tidal volume for the same set pressure.",
-                    "This is a medical emergency requiring immediate needle decompression followed by chest tube insertion."
+                    "<b>Load Analysis:</b> Acutely High Elastic Load (↓C).",
+                    "<b>Analysis:</b> The combination of sudden hemodynamic collapse and worsening respiratory mechanics is highly suggestive of a tension pneumothorax.",
+                    "<b>Ventilator Clues:</b> The rising PIP and Pplat (in any mode) or dropping tidal volumes (in PCV) indicate a sudden, severe decrease in respiratory system compliance.",
+                    "<b>Conclusion:</b> This is a medical emergency requiring immediate needle decompression followed by chest tube insertion."
                 ]
             },
             {
@@ -760,11 +785,10 @@
                 chartData: { pressure: { label: 'Airway Pressure (cmH₂O)', data: [5, 8, 12, 15, 12, 8, 5, 5, 9, 14, 18, 14, 9, 5] }, flow: { label: 'Diaphragm EAdi (μV)', data: [2, 4, 8, 10, 8, 4, 2, 2, 5, 9, 12, 9, 5, 2] } },
                 question: "Explain the relationship between the two waveforms in NAVA mode.",
                 modelAnswer: [
-                    "NAVA uses the electrical activity of the diaphragm (EAdi), measured by a special catheter, as the trigger and control signal.",
-                    "The airway pressure delivered by the ventilator is directly proportional to the EAdi signal.",
-                    "As the patient's neural drive (EAdi) increases, the ventilator provides proportionally more pressure support.",
-                    "In this example, a peak EAdi of 10 μV results in a peak pressure of (10 * 1.5) + PEEP = 15 + 5 = 20 cmH2O (approx).",
-                    "This provides near-perfect synchrony between patient effort and ventilator support."
+                    "<b>Taxonomy:</b> PC-CSVs with servo targeting.",
+                    "<b>Mechanism:</b> NAVA uses the electrical activity of the diaphragm (EAdi), measured by a special catheter, as the primary signal for all phase variables.",
+                    "<b>Trigger/Limit/Cycle:</b> The ventilator triggers, supports, and cycles the breath in direct proportion to the start, magnitude, and end of the EAdi signal.",
+                    "<b>Synchrony:</b> This provides near-perfect synchrony between patient effort and ventilator support, as the ventilator is responding directly to the patient's neural output."
                 ]
             },
             {
@@ -775,11 +799,132 @@
                 chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 2, 10, 10, 5, 5, 1, 10, 10, 5] } },
                 question: "What does the shape of the pressure waveform indicate about the patient's weaning trial?",
                 modelAnswer: [
-                    "The large negative deflection at the start of each breath indicates a very high work of breathing (WOB).",
-                    "The patient has to generate significant negative pressure to trigger the breath and pull in flow.",
-                    "The pressure support of 5 is insufficient to adequately unload the respiratory muscles.",
-                    "This pattern is a sign of impending respiratory muscle fatigue and weaning failure.",
-                    "The patient should be placed back on a higher level of support."
+                    "<b>Load Analysis:</b> High Patient Effort (Pmus) with inadequate support.",
+                    "<b>Analysis:</b> The large negative deflection ('scoop') at the start of each breath indicates a very high work of breathing (WOB). The patient has to generate significant negative pressure to trigger the breath and pull in flow.",
+                    "<b>Interpretation:</b> The pressure support of 5 is insufficient to adequately unload the respiratory muscles.",
+                    "<b>Conclusion:</b> This pattern is a sign of impending respiratory muscle fatigue and weaning failure. The patient should be placed back on a higher level of support."
+                ]
+            },
+            {
+                id: 'vc_high_resistance',
+                scenarioNumber: 33,
+                vignette: "An intubated asthma patient is wheezing. You note the PIP has risen from 28 to 45, but an inspiratory hold shows the Pplat is unchanged.",
+                settings: "Mode: VCV, VT 500 mL, PEEP 5, Flow 60 L/min (1 L/sec)",
+                chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 15, 45, 20, 20, 20, 12, 5, 5, 15, 45, 20, 12, 5] }, flow: { label: 'Flow (L/min)', data: [0, 60, 60, 0, 0, 0, -40, -20, 0, 60, 60, 0, -40, -20, 0] }, volume: { label: 'Volume (mL)', data: [0, 250, 500, 500, 500, 500, 250, 0, 0, 250, 500, 500, 250, 0] } },
+                question: "Provide a full taxonomic classification and analysis of the patient's respiratory mechanics.",
+                modelAnswer: [
+                    "<b>Taxonomy:</b> VC-CMVs.",
+                    "<b>Load:</b> High Resistive Load (↑R).",
+                    "<b>Trigger/Cycle:</b> Synchronous (assumed passive for mechanics measurement).",
+                    "<b>Limit/Inspiration Analysis:</b> The large gradient between Peak Inspiratory Pressure (PIP=45) and Plateau Pressure (Pplat=20) indicates high airway resistance. The unchanged Pplat confirms that lung compliance is stable.",
+                    "<b>Conclusion:</b> The high PIP is due to obstruction (e.g., bronchospasm), not stiff lungs. Management should target the obstruction."
+                ]
+            },
+            {
+                id: 'vc_low_compliance',
+                scenarioNumber: 34,
+                vignette: "A patient with ARDS is deteriorating. You note that for the same VCV settings, both PIP and Pplat are rising together.",
+                settings: "Mode: VCV, VT 420mL. PIP has risen from 30 to 45, and Pplat has risen from 22 to 37.",
+                chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [12, 25, 45, 37, 37, 25, 12, 12, 25, 45, 37, 25, 12] }, flow: { label: 'Flow (L/min)', data: [0, 60, 60, 0, 0, -60, -30, 0, 0, 60, 60, 0, -60, -30, 0] }, volume: { label: 'Volume (mL)', data: [0, 210, 420, 420, 420, 210, 0, 0, 210, 420, 420, 210, 0] } },
+                question: "Provide a full taxonomic classification and analysis of the patient's respiratory mechanics.",
+                modelAnswer: [
+                    "<b>Taxonomy:</b> VC-CMVs.",
+                    "<b>Load:</b> High Elastic Load (Acutely Worsening Compliance, ↓C).",
+                    "<b>Trigger/Cycle:</b> Synchronous (assumed passive).",
+                    "<b>Limit/Inspiration Analysis:</b> Both PIP and Pplat have risen in parallel. A rising Pplat at a constant volume is the definition of worsening compliance. The lungs have become 'stiffer'.",
+                    "<b>Conclusion:</b> This is a dangerous sign of worsening lung injury. Investigate for tension pneumothorax, ARDS progression, etc."
+                ]
+            },
+            {
+                id: 'stress_index',
+                scenarioNumber: 35,
+                vignette: "You are assessing a patient in VCV with constant flow to ensure the tidal volume is not causing overdistension.",
+                settings: "Mode: VCV, VT: 550mL, Flow: 60L/min (constant)",
+                chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 10, 16, 23, 31, 20, 10, 5, 5, 10, 16, 23, 31, 20, 10, 5] }, flow: { label: 'Flow (L/min)', data: [0, 60, 60, 60, 60, -50, -30, 0, 0, 60, 60, 60, 60, -50, -30, 0] }, volume: { label: 'Volume (mL)', data: [0, 137, 275, 412, 550, 300, 100, 0, 0, 137, 275, 412, 550, 300, 100, 0] } },
+                question: "Analyze the shape of the pressure waveform (Stress Index) and explain its clinical significance.",
+                modelAnswer: [
+                    "<b>Taxonomy:</b> VC-CMVs.",
+                    "<b>Load:</b> Dynamic Elastic Load (Overdistension).",
+                    "<b>Trigger/Cycle:</b> Synchronous (assumed passive).",
+                    "<b>Limit/Inspiration Asynchrony: Overdistension.</b> The pressure waveform is not a straight line; it has an upwardly concave ('smiling') shape. This corresponds to a Stress Index > 1, indicating that compliance is decreasing as the lung inflates.",
+                    "<b>Significance:</b> This is a key sign of alveolar overdistension and potential volutrauma (VILI). The tidal volume is too large for this patient's lungs and must be reduced."
+                ]
+            },
+            {
+                id: 'circuit_leak',
+                scenarioNumber: 36,
+                vignette: "You notice the expired tidal volume on the monitor is consistently 150mL lower than the inspired volume. The volume waveform looks unusual.",
+                settings: "Mode: PCV, Pinsp 20, PEEP 5",
+                chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5, 25, 25, 25, 5, 5, 5, 5, 25, 25, 25, 5] }, flow: { label: 'Flow (L/min)', data: [0, 75, 55, 35, -40, -30, -20, -15, 75, 55, 35, -40] }, volume: { label: 'Volume (mL)', data: [0, 200, 400, 550, 400, 300, 200, 150, 350, 550, 700, 550] } },
+                question: "Based on the volume waveform, what is the most likely problem?",
+                modelAnswer: [
+                    "<b>Problem:</b> Significant Circuit Leak.",
+                    "<b>Analysis:</b> The primary clue is on the volume waveform, which does not return to the zero baseline during exhalation. This indicates that the ventilator is not receiving all the gas it delivered.",
+                    "<b>Asynchrony Risk:</b> A large leak can cause auto-triggering because the ventilator senses continuous outflow.",
+                    "<b>Differentiation:</b> A leak can mimic auto-PEEP on the flow scalar. An expiratory hold maneuver will differentiate them: pressure will drop to set PEEP with a leak, but will stay elevated with auto-PEEP.",
+                    "<b>Management:</b> Find and fix the leak (check ETT cuff, all circuit connections, water trap)."
+                ]
+            },
+            {
+                id: 'vc_imv',
+                scenarioNumber: 37,
+                vignette: "A patient is being weaned. The ventilator is set to deliver a few mandatory breaths per minute, but the patient can breathe spontaneously between them.",
+                settings: "Mode: SIMV-VC, RR: 8, VT: 450, PS: 10",
+                chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5,15,25,15,5,5,15,15,15,5,5,15,25,15,5] }, flow: { label: 'Flow (L/min)', data: [0,60,60,-50,-20,0,50,30,15,-40,-10,0,60,60,-50,-20,0] }, volume: { label: 'Volume (mL)', data: [0,225,450,225,0,0,150,280,350,175,0,0,225,450,225,0] } },
+                question: "Identify the mode of ventilation by analyzing the different breath types.",
+                modelAnswer: [
+                    "<b>Taxonomy:</b> VC-IMVs (Volume Control, Intermittent Mandatory Ventilation, set-point).",
+                    "<b>Analysis:</b> Two distinct breath types are visible, defining IMV.",
+                    "<b>Mandatory Breaths:</b> These are machine-cycled. They have a square flow waveform and a rising 'shark-fin' pressure waveform (classic VCV).",
+                    "<b>Spontaneous Breaths:</b> These are patient-cycled. They have a decelerating flow waveform and a square pressure waveform (classic PSV).",
+                    "<b>Conclusion:</b> The mix of mandatory and spontaneous breaths defines IMV. Because the mandatory breaths are volume-controlled, the mode is VC-IMV."
+                ]
+            },
+            {
+                id: 'pendelluft',
+                scenarioNumber: 38,
+                vignette: "During an inspiratory pause on a patient with very heterogeneous lung disease, you notice a strange decay in the pressure and volume waveforms.",
+                settings: "Mode: VCV with inspiratory pause",
+                chartData: { pressure: { label: 'Pressure (cmH₂O)', data: [5,28,28,27,26,25,24,15,5,5,28,28,27,26,25,24,15,5] }, flow: { label: 'Flow (L/min)', data: [0,60,60,0,0,0,0,0,-50,-20,0,0,60,60,0,0,0,0,-50,-20,0] }, volume: { label: 'Volume (mL)', data: [0,225,450,450,445,440,435,250,0,0,225,450,450,445,440,435,250,0] } },
+                question: "What phenomenon does this slow decay in pressure and volume during a no-flow state represent?",
+                modelAnswer: [
+                    "<b>Phenomenon:</b> Pendelluft.",
+                    "<b>Analysis:</b> During an inspiratory pause (flow is zero), there is a slow, continuous decay in the measured plateau pressure and volume. This should not happen in a passive, homogenous lung.",
+                    "<b>Mechanism:</b> It represents the movement of gas from non-dependent (fast-filling, high pressure) lung regions to dependent (slow-filling, low pressure) lung regions after the ventilator has stopped delivering flow.",
+                    "<b>Significance:</b> It is a sign of severe lung heterogeneity (e.g., ARDS) and suggests that some lung regions may be overdistended while others are collapsed, contributing to VILI."
+                ]
+            },
+            {
+                id: 'time_constant',
+                scenarioNumber: 39,
+                vignette: "Two passive patients are ventilated with identical PCV settings. Patient A has ARDS. Patient B has severe COPD.",
+                settings: "Mode: PCV, Pinsp: 15, PEEP: 5, Ti: 1.2s",
+                chartData: {
+                    pressure: {
+                        datasets: [
+                            { label: 'Patient A (ARDS) & B (COPD)', data: [{x:0,y:5},{x:0.1,y:20},{x:1.2,y:20},{x:1.3,y:5},{x:2.5,y:5},{x:2.6,y:20},{x:3.8,y:20},{x:3.9,y:5}], borderColor: '#facc15', borderWidth: 2.5, pointRadius: 0 }
+                        ]
+                    },
+                    flow: {
+                        datasets: [
+                            { label: 'Patient A (ARDS)', data: [{x:0,y:0},{x:0.1,y:90},{x:0.4,y:5},{x:1.2,y:0},{x:1.3,y:-60},{x:1.6,y:-5},{x:2.5,y:0}, {x:2.6,y:90},{x:2.9,y:5},{x:3.8,y:0},{x:3.9,y:-60},{x:4.2,y:-5}], borderColor: '#60a5fa', borderWidth: 2.5, pointRadius: 0, tension: 0.2 },
+                            { label: 'Patient B (COPD)', data: [{x:0,y:0},{x:0.1,y:50},{x:1.2,y:15},{x:1.3,y:-40},{x:2.5,y:-10},{x:2.6,y:50},{x:3.8,y:15},{x:3.9,y:-40}], borderColor: '#4ade80', borderWidth: 2.5, pointRadius: 0, tension: 0.2 }
+                        ]
+                    },
+                    volume: {
+                        datasets: [
+                            { label: 'Patient A (ARDS)', data: [{x:0,y:0},{x:0.1,y:0},{x:0.6,y:300},{x:1.2,y:320},{x:1.3,y:320},{x:1.8,y:0},{x:2.5,y:0},{x:2.6,y:0},{x:3.1,y:300},{x:3.8,y:320},{x:3.9,y:320},{x:4.4,y:0}], borderColor: '#60a5fa', borderWidth: 2.5, pointRadius: 0, tension: 0.2, fill: { target: 'origin', above: 'rgba(96, 165, 250, 0.1)'} },
+                            { label: 'Patient B (COPD)', data: [{x:0,y:0},{x:0.1,y:0},{x:0.8,y:400},{x:1.2,y:550},{x:1.3,y:550},{x:2.5,y:100},{x:2.6,y:100},{x:3.3,y:500},{x:3.8,y:650},{x:3.9,y:650}], borderColor: '#4ade80', borderWidth: 2.5, pointRadius: 0, tension: 0.2, fill: { target: 'origin', above: 'rgba(74, 222, 128, 0.1)'} }
+                        ]
+                    }
+                },
+                question: "Which patient has the longer time constant? Explain your reasoning based on the flow waveform and the underlying pathophysiology.",
+                modelAnswer: [
+                    "<b>Answer:</b> Patient B (COPD) has the longer time constant.",
+                    "<b>Waveform Analysis:</b> The flow waveform for Patient B shows a slow, prolonged decay during inspiration and expiration. Inspiratory flow does not return to zero by the end of the set T<sub>i</sub>. This slow filling and emptying is the hallmark of a long time constant.",
+                    "<b>Pathophysiology (Patient B):</b> COPD causes high airway resistance. Since Time Constant = Resistance x Compliance, the high resistance creates a long time constant.",
+                    "<b>Pathophysiology (Patient A):</b> ARDS causes very low lung compliance. This creates a short time constant, seen as a rapid 'spike' and decay in inspiratory flow as the stiff lungs fill very quickly.",
+                    "<b>Clinical Implication:</b> Patient B is at high risk for auto-PEEP because of their long time constant and may require a shorter T<sub>i</sub> to maximize expiratory time."
                 ]
             }
         ];
@@ -812,6 +957,8 @@
         function startSimulator() {
             startScreen.style.display = 'none';
             osceScreen.style.display = 'block';
+            // Sort scenarios by scenarioNumber
+            scenarios.sort((a, b) => a.scenarioNumber - b.scenarioNumber);
             populateNav();
             loadScenario(0);
         }
@@ -822,7 +969,7 @@
                 const li = document.createElement('a');
                 li.href = '#';
                 li.className = 'block p-4 text-lg hover:bg-gray-100 border-b';
-                li.textContent = `Case ${index + 1}: ${scenario.id.replace(/_/g, ' ')}`;
+                li.textContent = `Case ${scenario.scenarioNumber}: ${scenario.id.replace(/_/g, ' ')}`;
                 li.dataset.index = index;
                 li.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -869,50 +1016,15 @@
         }
         
         function renderCharts(scenario) {
-            const { id, chartData, isPVLoop } = scenario;
+            const { id, chartData } = scenario;
             chartInstances.forEach(chart => chart.destroy());
             chartInstances = [];
             monitorCard.innerHTML = ''; // Clear previous charts
 
             if (!chartData) return;
             
-            if (isPVLoop) {
-                const canvasContainer = document.createElement('div');
-                canvasContainer.className = 'p-2 h-96'; // Taller for PV loops
-                const canvas = document.createElement('canvas');
-                canvas.id = `${id}-pvloop-chart`;
-                canvasContainer.appendChild(canvas);
-                monitorCard.appendChild(canvasContainer);
-                const ctx = canvas.getContext('2d');
-                const chart = new Chart(ctx, {
-                    type: 'scatter',
-                    data: {
-                        datasets: [{
-                            label: 'PV Loop',
-                            data: chartData.pressure.data.map((x, i) => ({ x, y: chartData.volume.data[i] })),
-                            borderColor: '#fb923c',
-                            backgroundColor: 'rgba(251, 146, 60, 0.2)',
-                            showLine: true,
-                            tension: 0.4,
-                            fill: true,
-                            borderWidth: 2.5
-                        }]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: { title: { display: true, text: 'Pressure (cmH₂O)', color: '#d1d5db' }, ticks: {color: '#9ca3af'}, grid: {color: 'rgba(255, 255, 255, 0.15)'} },
-                            y: { title: { display: true, text: 'Volume (mL)', color: '#d1d5db' }, beginAtZero: true, ticks: {color: '#9ca3af'}, grid: {color: 'rgba(255, 255, 255, 0.15)'} }
-                        }
-                    }
-                });
-                chartInstances.push(chart);
-                return;
-            }
-
             Object.entries(chartData).forEach(([key, data]) => {
-                if(data && data.data && data.data.length > 0) {
+                if(data && (data.data || data.datasets)) {
                     const canvasContainer = document.createElement('div');
                     canvasContainer.className = 'p-2 h-48';
                     const canvas = document.createElement('canvas');
@@ -921,27 +1033,47 @@
                     monitorCard.appendChild(canvasContainer);
 
                     const ctx = canvas.getContext('2d');
+                    
+                    let chartDatasets;
+                    if (data.datasets) {
+                        chartDatasets = data.datasets;
+                    } else {
+                        chartDatasets = [{
+                            label: data.label,
+                            data: data.data,
+                            borderColor: data.label.includes('ETCO') ? '#A78BFA' : key === 'pressure' ? '#facc15' : key === 'flow' ? '#4ade80' : '#60a5fa',
+                            borderWidth: 2.5,
+                            pointRadius: 0,
+                            tension: 0.2,
+                            fill: key === 'volume' ? { target: 'origin', above: 'rgba(96, 165, 250, 0.2)' } : false,
+                        }];
+                    }
+
                     const chart = new Chart(ctx, {
                         type: 'line',
                         data: {
-                            labels: Array.from({ length: data.data.length }, (_, i) => i),
-                            datasets: [{
-                                label: data.label,
-                                data: data.data,
-                                borderColor: data.label.includes('ETCO') ? '#A78BFA' : key === 'pressure' ? '#facc15' : key === 'flow' ? '#4ade80' : '#60a5fa',
-                                borderWidth: 2.5,
-                                pointRadius: 0,
-                                tension: 0.2,
-                                fill: key === 'volume' ? { target: 'origin', above: 'rgba(96, 165, 250, 0.2)' } : false,
-                            }]
+                            labels: Array.from({ length: 250 }, (_, i) => i * 0.02 * 2.5), // Create a generic time axis
+                            datasets: chartDatasets
                         },
                         options: {
                             responsive: true, maintainAspectRatio: false, animation: { duration: 0 },
-                            plugins: { legend: { display: false } },
+                            plugins: { 
+                                legend: { 
+                                    display: !!data.datasets, // Only display legend if there are multiple datasets
+                                    labels: {
+                                        color: '#EAEAEA'
+                                    }
+                                } 
+                            },
                             scales: {
-                                x: { ticks: { display: false }, grid: { color: 'rgba(255, 255, 255, 0.15)' } },
+                                x: { 
+                                    type: 'linear',
+                                    ticks: { color: '#9ca3af', font: { size: 10 } }, 
+                                    grid: { color: 'rgba(255, 255, 255, 0.15)' },
+                                    title: { display: true, text: 'Time (s)', color: '#d1d5db' }
+                                },
                                 y: {
-                                    title: { display: true, text: data.label, color: '#d1d5db' },
+                                    title: { display: true, text: data.label || key, color: '#d1d5db' },
                                     ticks: { color: '#9ca3af', font: { size: 10 } },
                                     grid: { color: 'rgba(255, 255, 255, 0.15)' },
                                     beginAtZero: key === 'volume'
@@ -970,7 +1102,7 @@
                 </div>
                 <div id="model-answer" class="model-answer p-4">
                      <div class="flex justify-between items-start mb-3">
-                        <h5 class="font-bold text-gray-800">Educational Points & Model Answer:</h5>
+                        <h5 class="font-bold text-gray-800">Taxonomy & Analysis:</h5>
                         <div class="brand-text text-sm font-bold">Critical Care Bootcamp</div>
                     </div>
                     <div id="checklist" class="space-y-2"></div>
@@ -1075,133 +1207,133 @@
             const debriefingContent = `
             <div class="info-card mt-8">
                 <header class="text-center mb-12">
-                    <h1 class="text-5xl font-extrabold text-gray-800">Ventilator Asynchrony: A Debriefing Guide</h1>
-                    <p class="text-xl mt-2 text-gray-600">This guide provides a comprehensive overview of common patient-ventilator asynchronies, categorized by the patient's respiratory drive. Understanding these patterns is crucial for optimizing mechanical ventilation, improving patient comfort, and preventing lung injury.</p>
+                    <h1 class="text-5xl font-extrabold text-gray-800">Ventilator Waveform Debriefing</h1>
+                    <p class="text-xl mt-2 text-gray-600">A systematic guide to interpreting ventilator graphics and managing asynchrony.</p>
                 </header>
 
                 <div class="space-y-12">
-                    <!-- High-Drive Asynchronies -->
+                    <!-- 6-Step Protocol -->
+                    <div class="info-card">
+                        <h2 class="card-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                            The 6-Step Waveform Analysis Protocol
+                        </h2>
+                        <p class="text-gray-600 mb-6">This protocol provides a systematic framework to deconstruct any ventilator waveform, moving from broad observation to specific diagnosis.</p>
+                        <ol class="list-decimal pl-5 space-y-3 text-gray-700">
+                            <li><strong>Assess the Scalars:</strong> Global assessment. What are the general shapes of the pressure, flow, and volume curves?</li>
+                            <li><strong>TAG the Mode:</strong> Classify the mode based on waveform shapes (see below).</li>
+                            <li><strong>Evaluate the Load:</strong> Determine the primary physiological challenge (Resistance, Compliance, or Patient Effort).</li>
+                            <li><strong>Analyze the Trigger:</strong> Examine the start of each breath for patient effort. Is triggering normal, failed, or false?</li>
+                            <li><strong>Analyze Inspiration (Limit):</strong> Assess for mismatch during the inspiratory phase. Is there flow starvation, work shifting, or overdistension?</li>
+                            <li><strong>Analyze Cycle & Expiration:</strong> Examine the transition to expiration. Is cycling early or late? Is there auto-PEEP?</li>
+                        </ol>
+                    </div>
+
+                    <!-- Mode Classification -->
+                    <div class="info-card">
+                        <h2 class="card-title">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"></path></svg>
+                            TAGging the Mode: Ventilator Classification
+                        </h2>
+                        <p class="text-gray-600 mb-6">Use the waveforms to determine the mode's taxonomy, which consists of three parts:</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <h4 class="font-bold text-lg">1. Control Variable</h4>
+                                <p><span class="tag tag-vc">Volume Control (VC)</span>: Square or ramped flow waveform. Pressure varies with load.</p>
+                                <p><span class="tag tag-pc">Pressure Control (PC)</span>: Square pressure waveform. Flow is decelerating and varies with load.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">2. Breath Sequence</h4>
+                                <p><span class="tag tag-cmv">CMV</span>: All breaths are mandatory (machine-cycled).</p>
+                                <p><span class="tag tag-imv">IMV</span>: Mix of mandatory and spontaneous breaths.</p>
+                                <p><span class="tag tag-csv">CSV</span>: All breaths are spontaneous (patient-cycled).</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">3. Targeting Scheme</h4>
+                                <p><span class="tag tag-s">Set-point (s)</span>: A single, fixed target (e.g., 450mL volume).</p>
+                                <p><span class="tag tag-a">Adaptive (a)</span>: Ventilator adjusts support over several breaths to meet an average target.</p>
+                                <p><span class="tag tag-r">Servo (r)</span>: Ventilator output is proportional to patient effort in real-time.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Asynchrony Tables -->
                     <div class="info-card">
                         <h2 class="card-title">
                              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                             High-Drive (Under-assistance) Asynchronies
                         </h2>
-                        <p class="text-gray-600 mb-6">These occur when the ventilator support is insufficient for the patient's respiratory drive. The general strategy is to <strong>increase support</strong> to better match the patient's demand.</p>
+                        <p class="text-gray-600 mb-6">Occur when ventilator support is insufficient for the patient's drive. General strategy: <strong>increase support</strong>.</p>
                         <div class="overflow-x-auto rounded-lg border">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asynchrony Type</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waveform Characteristics</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Management Plan</th>
-                                    </tr>
-                                </thead>
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50"><tr><th class="px-4 py-2 text-left font-medium text-gray-500">Asynchrony</th><th class="px-4 py-2 text-left font-medium text-gray-500">Primary Load</th><th class="px-4 py-2 text-left font-medium text-gray-500">Patient-Ventilator Interaction</th></tr></thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr>
-                                        <td class="px-6 py-4 align-top"><strong class="text-gray-900">Flow Starvation</strong></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">The pressure waveform shows a concave, "scooped" appearance during inspiration, indicating the patient is pulling harder than the flow being delivered.</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">1. <strong>Increase Flow:</strong> Boost the inspiratory flow rate (e.g., from 60 to 80-100 L/min). <br> 2. <strong>Change Mode:</strong> Switch to a pressure-targeted mode (PCV or PSV) to allow for variable, on-demand flow. <br> 3. <strong>Treat Cause:</strong> Address underlying causes of high drive (e.g., acidosis, pain, fever, anxiety).</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 align-top"><strong class="text-gray-900">Inadequate Driving Pressure</strong></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">In PCV, the flow waveform initially decelerates but then rises again, creating a "camel back" shape. This shows the patient's effort is still high and they are "sucking" for more flow.</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">1. <strong>Increase Driving Pressure:</strong> Increase the inspiratory pressure setting in 2 cmH₂O increments. The goal is a smooth, passive deceleration of the flow waveform to baseline.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 align-top"><strong class="text-gray-900">Double Triggering</strong></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">Two consecutive ventilator breaths are delivered for a single patient effort. This happens when the patient's neural inspiratory time is longer than the set mechanical time, causing "breath stacking."</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">1. <strong>Primary:</strong> Increase the mechanical inspiratory time (Ti) to better match the patient's neural time. <br> 2. <strong>Secondary:</strong> Consider increasing the pressure target to better satisfy the patient's demand and shorten their effort.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 align-top"><strong class="text-gray-900">Premature Cycling</strong></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">In PCV, the inspiratory flow waveform ends (cycles off) while still significantly above zero, indicating the set inspiratory time is too short.</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">1. <strong>Increase Inspiratory Time (Ti):</strong> Lengthen the Ti until the flow waveform shows that inspiratory flow just reaches zero at the end of inspiration. This ensures full delivery of the set pressure.</td>
-                                    </tr>
-                                     <tr>
-                                        <td class="px-6 py-4 align-top"><strong class="text-gray-900">Slow Pressurization</strong></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">The pressure waveform has a slow, sloped rise instead of a sharp, square shape. This indicates the rise time is too slow, increasing the work of breathing.</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">1. <strong>Increase Pressurization Rate:</strong> Shorten the rise time setting until the pressure waveform is nearly square, without significant overshoot.</td>
-                                    </tr>
+                                    <tr><td class="px-4 py-2 align-top"><strong>Flow Starvation</strong></td><td class="px-4 py-2 align-top">High P<sub>mus</sub></td><td class="px-4 py-2 align-top"><b>Limit Asynchrony:</b> Patient's desired flow > ventilator's set flow. Causes 'scooped' pressure wave in VCV.</td></tr>
+                                    <tr><td class="px-4 py-2 align-top"><strong>Work Shifting</strong></td><td class="px-4 py-2 align-top">High P<sub>mus</sub></td><td class="px-4 py-2 align-top"><b>Limit Asynchrony:</b> Patient's effort + low vent pressure achieve the target volume. The algorithm then reduces pressure further, shifting work to the patient.</td></tr>
+                                    <tr><td class="px-4 py-2 align-top"><strong>Double Triggering</strong></td><td class="px-4 py-2 align-top">High P<sub>mus</sub></td><td class="px-4 py-2 align-top"><b>Cycle Asynchrony:</b> Patient's neural T<sub>i</sub> > ventilator's set T<sub>i</sub>. The early cycle leads to a second triggered breath.</td></tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- Low-Drive Asynchronies -->
                      <div class="info-card">
                         <h2 class="card-title">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
                             Low-Drive (Over-assistance) Asynchronies
                         </h2>
-                        <p class="text-gray-600 mb-6">These occur when the ventilator provides too much support or is poorly synchronized with a patient who has a low respiratory drive. The general strategy is to <strong>decrease support</strong>.</p>
+                        <p class="text-gray-600 mb-6">Occur when ventilator support is excessive. General strategy: <strong>decrease support</strong>.</p>
                          <div class="overflow-x-auto rounded-lg border">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asynchrony Type</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waveform Characteristics</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Management Plan</th>
-                                    </tr>
-                                </thead>
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50"><tr><th class="px-4 py-2 text-left font-medium text-gray-500">Asynchrony</th><th class="px-4 py-2 text-left font-medium text-gray-500">Primary Load</th><th class="px-4 py-2 text-left font-medium text-gray-500">Patient-Ventilator Interaction</th></tr></thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr>
-                                        <td class="px-6 py-4 align-top"><strong class="text-gray-900">Ineffective Efforts (IEE)</strong></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">Small, periodic dips in the pressure and flow waveforms during the expiratory phase that do not trigger a ventilator breath. This is the most common asynchrony.</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">1. <strong>Reduce Support:</strong> Decrease the level of Pressure Support to reduce over-assistance. <br> 2. <strong>Check Trigger:</strong> Ensure trigger sensitivity is not set too difficult (i.e., make it more sensitive). <br> 3. <strong>Correct Auto-PEEP:</strong> Check for and correct auto-PEEP, which can make it harder for the patient to trigger.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 align-top"><strong class="text-gray-900">Delayed Cycling</strong></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">A pressure spike at the end of inspiration, indicating the patient is actively trying to exhale against the ventilator because the mechanical inspiratory time is too long.</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">1. <strong>Shorten Inspiratory Time:</strong> In PSV, increase the <strong>Expiratory Trigger Sensitivity (ETS)</strong> (e.g., from 10% to a higher value like 40-50%). In PCV, directly decrease the set Ti.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 align-top"><strong class="text-gray-900">Auto-PEEP (Gas Trapping)</strong></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">The expiratory flow waveform does not return to the zero baseline before the next breath begins, indicating incomplete exhalation and trapped gas.</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">1. <strong>Maximize Expiratory Time:</strong> Decrease the respiratory rate. <br> 2. <strong>Shorten Inspiratory Time:</strong> Increase the inspiratory flow rate (in VCV) or decrease Ti (in PCV). <br> 3. <strong>Treat Obstruction:</strong> Administer bronchodilators for underlying obstructive disease.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 align-top"><strong class="text-gray-900">Reverse Triggering</strong></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">A passive mechanical breath from the ventilator triggers a reflexive diaphragmatic contraction in a deeply sedated patient, which can lead to breath stacking.</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">1. <strong>Reduce Sedation:</strong> Decrease the level of sedation to allow the patient's own respiratory pattern to emerge. <br> 2. <strong>Change Vent Pattern:</strong> Adjust the ventilator rate or tidal volume to disrupt the entrainment pattern.</td>
-                                    </tr>
+                                    <tr><td class="px-4 py-2 align-top"><strong>Ineffective Efforts</strong></td><td class="px-4 py-2 align-top">Low P<sub>mus</sub> / Auto-PEEP</td><td class="px-4 py-2 align-top"><b>Trigger Asynchrony:</b> Patient's effort is too weak to overcome trigger sensitivity or auto-PEEP.</td></tr>
+                                    <tr><td class="px-4 py-2 align-top"><strong>Delayed Cycling</strong></td><td class="px-4 py-2 align-top">Obstructive (short neural T<sub>i</sub>)</td><td class="px-4 py-2 align-top"><b>Cycle Asynchrony:</b> Ventilator's T<sub>i</sub> > patient's neural T<sub>i</sub>. Patient actively exhales against the breath.</td></tr>
+                                    <tr><td class="px-4 py-2 align-top"><strong>Auto-PEEP</strong></td><td class="px-4 py-2 align-top">High Resistance / High RR</td><td class="px-4 py-2 align-top"><b>Cycle/Expiration Asynchrony:</b> Insufficient time for exhalation leads to gas trapping.</td></tr>
+                                    <tr><td class="px-4 py-2 align-top"><strong>Reverse Triggering</strong></td><td class="px-4 py-2 align-top">Passive (Low P<sub>mus</sub>)</td><td class="px-4 py-2 align-top"><b>Trigger Asynchrony:</b> A machine-triggered breath causes a reflexive patient effort.</td></tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     
-                    <!-- Triggering & Other Issues -->
+                    <!-- Advanced Modes & Concepts -->
+                    <div class="info-card">
+                         <h2 class="card-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            Advanced Modes & Concepts
+                        </h2>
+                        <div class="space-y-4">
+                            <p><b>Adaptive Pressure Control (e.g., PRVC, VC+):</b> This is <span class="tag tag-pc">PC</span>-<span class="tag tag-cmv">CMV</span><span class="tag tag-a">a</span>. The ventilator delivers pressure-controlled breaths but adjusts the inspiratory pressure over several breaths to target an average tidal volume. As seen in the 'Work Shifting' scenario, this can lead to asynchrony if the patient's effort increases, as the ventilator will paradoxically reduce support.</p>
+                            <p><b>Adaptive Support Ventilation (ASV):</b> This is a more complex <span class="tag tag-r">servo</span>-targeting mode. It uses the Otis 'equation of motion' to calculate the optimal respiratory rate and tidal volume for a patient based on their measured respiratory mechanics (time constant). It then delivers pressure-controlled breaths to achieve these targets. It can seamlessly switch between mandatory and spontaneous breath sequences. Its taxonomy is not a simple PC-CMV; it is a unique adaptive servo mode.</p>
+                            <p><b>Esophageal Balloon (Pes):</b> This is a tool, not a mode. It measures esophageal pressure as a surrogate for pleural pressure. This allows for direct measurement of patient effort (P<sub>mus</sub>) and calculation of the true distending pressure of the lung (Transpulmonary Pressure, P<sub>L</sub> = P<sub>aw</sub> - P<sub>es</sub>). It is the gold standard for analyzing patient-ventilator interaction and ensuring lung-protective ventilation in active patients.</p>
+                        </div>
+                    </div>
+
+                    <!-- Lung Mechanics -->
                     <div class="info-card">
                         <h2 class="card-title">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Triggering & Other Issues
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" /></svg>
+                            Lung Mechanics & Time Constants
                         </h2>
-                         <div class="overflow-x-auto rounded-lg border">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waveform Characteristics</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Management Plan</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr>
-                                        <td class="px-6 py-4 align-top"><strong class="text-gray-900">Auto-Triggering</strong></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">The ventilator delivers breaths at a rate higher than set, without any corresponding patient effort.</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">1. <strong>Troubleshoot:</strong> Check the circuit for leaks (e.g., cuff leak) or condensation that can mimic patient effort. <br> 2. <strong>Adjust Sensitivity:</strong> If no physical cause is found, decrease the trigger sensitivity (i.e., make it less sensitive/more difficult to trigger).</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 align-top"><strong class="text-gray-900">Fast Pressurization (Overshoot)</strong></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">A sharp spike in the pressure waveform that goes above the target pressure at the very start of a breath.</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">1. <strong>Decrease Pressurization Rate:</strong> Lengthen the rise time setting until the overshoot is eliminated and the pressure waveform has a clean, square appearance.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 align-top"><strong class="text-gray-900">Secretions</strong></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">A "sawtooth" or jagged pattern on the flow and pressure waveforms, caused by turbulent airflow from secretions in the airway.</td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 align-top">1. <strong>Airway Clearance:</strong> The primary intervention is to suction the patient and ensure the ventilator circuit is free of condensation.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <p class="text-gray-600 mb-4">The speed at which a lung unit fills and empties is determined by its <strong>Time Constant (τ)</strong>, calculated as: <strong>τ = Compliance × Resistance</strong>. A short time constant means the lung unit fills and empties quickly. A long time constant means it fills and empties slowly.</p>
+                        <div class="space-y-4">
+                            <div class="collapsible">
+                                <div class="collapsible-header">
+                                    <span>Question 1: Which patient has a shorter time constant?</span>
+                                    <span class="arrow">&#9654;</span>
+                                </div>
+                                <div class="collapsible-content">
+                                    <p>A patient with pure ARDS (low compliance, normal resistance) or a patient with pure Asthma (normal compliance, high resistance)?<br><br><b>Answer:</b> The ARDS patient. The very low compliance leads to a short time constant, meaning their lungs fill and empty very quickly (appearing "stiff").</p>
+                                </div>
+                            </div>
+                             <div class="collapsible">
+                                <div class="collapsible-header">
+                                    <span>Question 2: Clinical Application</span>
+                                    <span class="arrow">&#9654;</span>
+                                </div>
+                                <div class="collapsible-content">
+                                    <p>You are ventilating a severe COPD patient (long time constant) in PCV. To prevent auto-PEEP, should you use a shorter or longer inspiratory time (T<sub>i</sub>)?<br><br><b>Answer:</b> A shorter T<sub>i</sub>. This maximizes the available expiratory time, which is critical for allowing the slow lung units to empty and preventing gas trapping.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1210,6 +1342,16 @@
             const guideContainer = document.getElementById('debriefing-guide');
             guideContainer.innerHTML = debriefingContent;
             guideContainer.classList.remove('hidden');
+            
+            // Add event listeners for new collapsible sections
+            document.querySelectorAll('.collapsible-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    header.classList.toggle('open');
+                    content.classList.toggle('open');
+                });
+            });
+
             guideContainer.scrollIntoView({ behavior: 'smooth' });
         }
 
